@@ -1,0 +1,50 @@
+#
+# Description
+# -----------
+# This table stores the links from other modules to be checked and their current status.
+#
+# Fields
+# ------
+# id:                       The ID assigned to the url.
+# uuid:                     The Universal Unique ID.
+# business_id:              The ID of the business the url is attached to.
+#
+# object:                   The object reference. This is used via hooks to get info from other modules.
+# object_id:                The ID of the object.
+# 
+# http_status:              The current http status of the URL. It will take several errors before the status is changed.
+#                           
+#                               10 - Pending
+#                               70 - To many redirects
+#                               80 - Unable to lookup/connect to website.
+#                               90 - Garbage returned
+#                               200 - Good
+#                               404 - Not Found
+#                               
+# last_http_status:         The http status from the last check
+# last_check:               The UTC date and time the last check was performed.
+#                               
+# num_errors:               The number of errors that have occured since last successful check.  **Future**
+#
+# date_added:               The UTC date and time the record was added.
+# last_updated:             The UTC date and time the record was last updated.
+#
+create table ciniki_linkchecker_urls (
+    id int not null auto_increment,
+    uuid char(36) not null,
+    business_id int not null,
+    object varchar(250) not null,
+    object_id varchar(250) not null,
+    url varchar(250) not null,
+    new_url varchar(250) not null,
+    http_status smallint unsigned not null,
+    last_http_status smallint not null,
+    last_check datetime not null,
+    num_errors int not null,
+    date_added datetime not null,
+    last_updated datetime not null,
+    primary key (id),
+    unique index (uuid),
+    unique index (object, object_id),
+    index sync (business_id, uuid, last_updated)
+) ENGINE='InnoDB', COMMENT='v1.01';
