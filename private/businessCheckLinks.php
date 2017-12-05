@@ -11,32 +11,32 @@
 // Returns
 // -------
 //
-function ciniki_linkchecker_businessCheckLinks(&$ciniki, $business_id) {
+function ciniki_linkchecker_tenantCheckLinks(&$ciniki, $tnid) {
 
-    ciniki_core_loadMethod($ciniki, 'ciniki', 'businesses', 'hooks', 'getActiveModules');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'tenants', 'hooks', 'getActiveModules');
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'objectAdd');
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'objectUpdate');
     ciniki_core_loadMethod($ciniki, 'ciniki', 'linkchecker', 'private', 'getHeaders');
 
     //
-    // Get the list of modules enabled for the business
+    // Get the list of modules enabled for the tenant
     //
-    $rc = ciniki_businesses_hooks_getActiveModules($ciniki, $business_id, array());
+    $rc = ciniki_tenants_hooks_getActiveModules($ciniki, $tnid, array());
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
-    $business_modules = array_keys($rc['modules']);
+    $tenant_modules = array_keys($rc['modules']);
 
     //
     // Update the modules indexes
     //
     $objects = array();
-    foreach($business_modules as $module) {
+    foreach($tenant_modules as $module) {
         list($pkg, $mod) = explode('.', $module);
         $rc = ciniki_core_loadMethod($ciniki, $pkg, $mod, 'hooks', 'linkcheckerList');
         if( $rc['stat'] == 'ok' ) {
             $fn = $rc['function_call'];
-            $rc = $fn($ciniki, $business_id, array());
+            $rc = $fn($ciniki, $tnid, array());
             if( $rc['stat'] != 'ok' ) {
                 return $rc;
             }
@@ -60,7 +60,7 @@ function ciniki_linkchecker_businessCheckLinks(&$ciniki, $business_id) {
         . "last_check, "
         . "num_errors "
         . "FROM ciniki_linkchecker_urls "
-        . "WHERE business_id = '" . ciniki_core_dbQuote($ciniki, $business_id) . "' "
+        . "WHERE tnid = '" . ciniki_core_dbQuote($ciniki, $tnid) . "' "
         . "";
 
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryIDTree');
@@ -100,7 +100,7 @@ function ciniki_linkchecker_businessCheckLinks(&$ciniki, $business_id) {
                 'num_errors' => 0,
                 );
         }
-        $rc = ciniki_linkchecker_getHeaders($ciniki, $business_id, $object['url']);
+        $rc = ciniki_linkchecker_getHeaders($ciniki, $tnid, $object['url']);
         if( $rc['stat'] == 'ok' && preg_match('/facebook.com/', $object['url']) && preg_match("/HTTP.* 302 Found/", $rc['headers'][0], $matches) ) {
             error_log('facebook: ' . $object['url']);
             $obj['http_status'] = 200;
@@ -124,7 +124,7 @@ function ciniki_linkchecker_businessCheckLinks(&$ciniki, $business_id) {
                 break;
             }
             $obj['new_url'] = $rc['headers']['Location'];
-            $rc = ciniki_linkchecker_getHeaders($ciniki, $business_id, $rc['headers']['Location']);
+            $rc = ciniki_linkchecker_getHeaders($ciniki, $tnid, $rc['headers']['Location']);
         }
         if( $num_redirects > 10 ) {
             continue;
@@ -142,14 +142,14 @@ function ciniki_linkchecker_businessCheckLinks(&$ciniki, $business_id) {
             }
             if( count($updates) > 0 ) {
                 print_r($updates);
-                $rc = ciniki_core_objectUpdate($ciniki, $business_id, 'ciniki.linkchecker.url', $existing_objects[$oid]['id'], $updates, 0x04);
+                $rc = ciniki_core_objectUpdate($ciniki, $tnid, 'ciniki.linkchecker.url', $existing_objects[$oid]['id'], $updates, 0x04);
                 if( $rc['stat'] != 'ok' && $rc['stat']) {
                     return $rc;
                 }
             }
         } else {    
             print_r($obj);
-            $rc = ciniki_core_objectAdd($ciniki, $business_id, 'ciniki.linkchecker.url', $obj, 0x04);
+            $rc = ciniki_core_objectAdd($ciniki, $tnid, 'ciniki.linkchecker.url', $obj, 0x04);
             if( $rc['stat'] != 'ok' ) {
                 return $rc;
             }

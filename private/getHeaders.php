@@ -11,7 +11,7 @@
 // Returns
 // -------
 //
-function ciniki_linkchecker_getHeaders(&$ciniki, $business_id, $url) {
+function ciniki_linkchecker_getHeaders(&$ciniki, $tnid, $url) {
     //
     // If instagram, use get_headers instead
     //

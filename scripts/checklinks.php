@@ -34,12 +34,12 @@ $ciniki = $rc['ciniki'];
 $ciniki['session']['user']['id'] = -3;  // Setup to Ciniki Robot
 
 //
-// Load the businesses that have linkchecker enabled
+// Load the tenants that have linkchecker enabled
 //
 $strsql = "SELECT b.id, b.name "
-    . "FROM ciniki_business_modules AS m "
-    . "INNER JOIN ciniki_businesses AS b ON ("
-        . "m.business_id = b.id "
+    . "FROM ciniki_tenant_modules AS m "
+    . "INNER JOIN ciniki_tenants AS b ON ("
+        . "m.tnid = b.id "
         . ") "
     . "WHERE m.package = 'ciniki' "
     . "AND m.module = 'linkchecker' "
@@ -50,16 +50,16 @@ $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'ciniki.linkchecker', 'item');
 if( $rc['stat'] != 'ok' ) {
     return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.linkchecker.4', 'msg'=>'', 'err'=>$rc['err']));
 }
-$businesses = isset($rc['rows']) ? $rc['rows'] : array();
+$tenants = isset($rc['rows']) ? $rc['rows'] : array();
 
 //
-// Run the linkcheck for each business
+// Run the linkcheck for each tenant
 //
-ciniki_core_loadMethod($ciniki, 'ciniki', 'linkchecker', 'private', 'businessCheckLinks');
-foreach($businesses as $business) {
-    $rc = ciniki_linkchecker_businessCheckLinks($ciniki, $business['id']);
+ciniki_core_loadMethod($ciniki, 'ciniki', 'linkchecker', 'private', 'tenantCheckLinks');
+foreach($tenants as $tenant) {
+    $rc = ciniki_linkchecker_tenantCheckLinks($ciniki, $tenant['id']);
     if( $rc['stat'] != 'ok' ) {
-        print "LINKCHECKER-ERR: Failed to run for " . $business['name'] . " Error #" . $rc['err']['code'] . ": " . $rc['err']['msg'] . "\n";
+        print "LINKCHECKER-ERR: Failed to run for " . $tenant['name'] . " Error #" . $rc['err']['code'] . ": " . $rc['err']['msg'] . "\n";
         
     }
 }

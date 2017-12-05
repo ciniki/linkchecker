@@ -7,7 +7,7 @@
 # ------
 # id:                       The ID assigned to the url.
 # uuid:                     The Universal Unique ID.
-# business_id:              The ID of the business the url is attached to.
+# tnid:                     The ID of the tenant the url is attached to.
 #
 # object:                   The object reference. This is used via hooks to get info from other modules.
 # object_id:                The ID of the object.
@@ -32,7 +32,7 @@
 create table ciniki_linkchecker_urls (
     id int not null auto_increment,
     uuid char(36) not null,
-    business_id int not null,
+    tnid int not null,
     object varchar(250) not null,
     object_id varchar(250) not null,
     url varchar(250) not null,
@@ -46,5 +46,5 @@ create table ciniki_linkchecker_urls (
     primary key (id),
     unique index (uuid),
     unique index (object, object_id),
-    index sync (business_id, uuid, last_updated)
+    index sync (tnid, uuid, last_updated)
 ) ENGINE='InnoDB', COMMENT='v1.01';
